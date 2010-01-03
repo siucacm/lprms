@@ -1,0 +1,10 @@
+This folder contains the static mockup for the design of the web portal that
+this will ultimately house. It should at least provide some idea of the default
+theme/template that will ship with the script, plus account for a feature list.
+
+While we want the layout to remain as fluid as possible (with CSS), there has
+to be at least some underlying structure in the system, to give developers an
+idea of how the portal should look. Then the artsy people can come in and
+redesign the look and feel all they want.
+
+                              - worldwise001@users.sourceforge.net
