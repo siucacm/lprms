@@ -25,12 +25,18 @@ $global['core']['sql']['prefix'] = '';
 $global['core']['config'] = array();
 $global['core']['config']['theme'] = 'default';
 $global['core']['config']['baseUrl'] = 'http://localhost';
+$global['core']['config']['recaptcha_pub'] = '';
+$global['core']['config']['recaptcha_pri'] = '';
 
 //rest of the includes
 require_once('config.inc.php');
 require_once('sql.php');
 
 sql_load_config();
+
+require_once('xml.php');
+require_once('steam.php');
+require_once('xfire.php');
 /*
 require_once('session.php');
 require_once('sqlfunc.php');
