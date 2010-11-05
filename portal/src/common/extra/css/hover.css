@@ -1,0 +1,17 @@
+#popup {
+	/* Necessary: */
+	position: absolute;
+	display: none;
+	z-index: 10;
+	
+	/* Additional styling: */
+	font-size: 12px;
+	background-color: #EEEEEE;
+	color: #000000;
+	border: 1px dotted #EECCEE;
+	/*opacity: .85;
+	filter: alpha(opacity=85);*/
+	text-align: center;
+	padding: 5px;
+	line-height: 2em;
+}
