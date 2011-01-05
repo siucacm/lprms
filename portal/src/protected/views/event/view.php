@@ -13,9 +13,42 @@ $this->menu=array(
 );
 ?>
 
-<h1>View Event #<?php echo $model->id; ?></h1>
+<h1><?php echo $model->name; ?></h1>
 
-<?php $this->widget('zii.widgets.CDetailView', array(
+<div class="box">
+    <div class="tabber">
+        <div class="tabbertab" title="Details">
+            <div class="location_map">
+
+            </div>
+            <div class="status">
+                <span class="textheader">Where</span>
+                <span class="location"><?php echo $model->location->name; ?></span><br />
+
+                <span class="textheader">When</span>
+                <b>Start:</b> <?php echo date('America/Chicago', strtotime($model->datetime_start)); ?><br />
+                <b>End:</b> <?php echo date('America/Chicago', strtotime($model->datetime_end)); ?><br />
+                <b>Duration:</b> hours
+            </div>
+        </div>
+        <div class="tabbertab" title="Information">
+            <?php echo $model->information; ?>
+        </div>
+        <div class="tabbertab" title="Location Map">
+            
+        </div>
+        <div class="tabbertab" title="Seating Map">
+        </div>
+        <div class="tabbertab" title="Tournaments">
+        </div>
+        <div class="tabbertab" title="Attendees">
+        </div>
+        <div class="tabbertab" title="Register">
+        </div>
+    </div>
+</div>
+
+<?php /* $this->widget('zii.widgets.CDetailView', array(
 	'data'=>$model,
 	'attributes'=>array(
 		'id',
@@ -32,4 +65,4 @@ $this->menu=array(
 		'agreement',
 		'min_age',
 	),
-)); ?>
+)); */ ?>

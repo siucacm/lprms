@@ -30,12 +30,12 @@ class EventController extends Controller
 				'actions'=>array('index','view'),
 				'users'=>array('*'),
 			),
-			array('allow', // allow authenticated user to perform 'create' and 'update' actions
+/* 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
 				'actions'=>array('create','update'),
 				'users'=>array('@'),
-			),
+			), */
 			array('allow', // allow admin user to perform 'admin' and 'delete' actions
-				'actions'=>array('admin','delete'),
+				'actions'=>array('admin','create','update','delete'),
 				'users'=>array('admin'),
 			),
 			array('deny',  // deny all users
@@ -48,11 +48,34 @@ class EventController extends Controller
 	 * Displays a particular model.
 	 * @param integer $id the ID of the model to be displayed
 	 */
-	public function actionView($id)
+	
+	public function actionView()
 	{
+		$post=$this->loadModel();
 		$this->render('view',array(
-			'model'=>$this->loadModel($id),
+			'model'=>$post,
 		));
+	}
+	 
+	 /**
+	 * Returns the data model based on the primary key given in the GET variable.
+	 * If the data model is not found, an HTTP exception will be raised.
+	 * @param integer the ID of the model to be loaded
+	 */
+	public function loadModel()
+	{
+		$model = null;
+		if(isset($_GET['id']))
+		{
+			$model=Event::model()->findByPk($_GET['id']);
+		}
+		else if(isset($_GET['sanitized']))
+		{
+			$model=Event::model()->find('sanitized=:sanitized', array(':sanitized'=>$_GET['sanitized']));
+		}
+		if($model===null)
+			throw new CHttpException(404,'The requested page does not exist.');
+		return $model;
 	}
 
 	/**
@@ -146,19 +169,6 @@ class EventController extends Controller
 		$this->render('admin',array(
 			'model'=>$model,
 		));
-	}
-
-	/**
-	 * Returns the data model based on the primary key given in the GET variable.
-	 * If the data model is not found, an HTTP exception will be raised.
-	 * @param integer the ID of the model to be loaded
-	 */
-	public function loadModel($id)
-	{
-		$model=Event::model()->findByPk((int)$id);
-		if($model===null)
-			throw new CHttpException(404,'The requested page does not exist.');
-		return $model;
 	}
 
 	/**

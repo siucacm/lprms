@@ -67,6 +67,13 @@ root {
     background-color: white;
 }
 
+#breadcrumbs {
+    position: absolute;
+    top: 210px;
+	left: 20px;
+    height: 30px;
+}
+
 #info {
     position: absolute;
     top: 101px;
@@ -249,7 +256,7 @@ div.view
 
 div.breadcrumbs
 {
-	font-size: 0.9em;
+    font-size: 14px;
 	padding: 5px 20px;
 }
 

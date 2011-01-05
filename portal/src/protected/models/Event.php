@@ -19,8 +19,8 @@
  * @property integer $min_age
  *
  * The followings are the available model relations:
- * @property AreaMap $idMap0
- * @property AreaLocation $idLocation0
+ * @property AreaMap $idMap
+ * @property AreaLocation $idLocation
  * @property EventPrize[] $eventPrizes
  * @property GameMatch[] $gameMatches
  * @property GameTournament[] $gameTournaments
@@ -61,7 +61,7 @@ class Event extends CActiveRecord
 			array('id_location, id_map, capacity', 'length', 'max'=>10),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
-			array('id, name, sanitized, datetime_start, datetime_end, price, id_location, id_map, capacity, information, reminder, agreement, min_age', 'safe', 'on'=>'search'),
+			array('id, name, datetime_start, datetime_end, price, id_location, id_map, capacity, information, reminder, agreement, min_age', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -73,13 +73,13 @@ class Event extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'idMap0' => array(self::BELONGS_TO, 'AreaMap', 'id_map'),
-			'idLocation0' => array(self::BELONGS_TO, 'AreaLocation', 'id_location'),
-			'eventPrizes' => array(self::HAS_MANY, 'EventPrize', 'id_event'),
-			'gameMatches' => array(self::HAS_MANY, 'GameMatch', 'id_event'),
-			'gameTournaments' => array(self::HAS_MANY, 'GameTournament', 'id_event'),
-			'refUserEvents' => array(self::HAS_MANY, 'RefUserEvent', 'id_event'),
-			'webAlbums' => array(self::HAS_MANY, 'WebAlbum', 'id_event'),
+			'map' => array(self::BELONGS_TO, 'Map', 'id_map'),
+			'location' => array(self::BELONGS_TO, 'Location', 'id_location'),
+			'prizes' => array(self::HAS_MANY, 'Prize', 'id_event'),
+			'matches' => array(self::HAS_MANY, 'Match', 'id_event'),
+			'tournaments' => array(self::HAS_MANY, 'Tournament', 'id_event'),
+			'users' => array(self::MANY_MANY, 'User', 'ref_user_event(id_user, id_event)'),
+			//'webAlbums' => array(self::HAS_MANY, 'WebAlbum', 'id_event'),
 		);
 	}
 
@@ -95,8 +95,8 @@ class Event extends CActiveRecord
 			'datetime_start' => 'Datetime Start',
 			'datetime_end' => 'Datetime End',
 			'price' => 'Price',
-			'id_location' => 'Id Location',
-			'id_map' => 'Id Map',
+			'id_location' => 'Location',
+			'id_map' => 'Map',
 			'capacity' => 'Capacity',
 			'information' => 'Information',
 			'reminder' => 'Reminder',
@@ -134,4 +134,11 @@ class Event extends CActiveRecord
 			'criteria'=>$criteria,
 		));
 	}
+	
+	public function getUrl()
+    {
+        return Yii::app()->createUrl('event/view', array(
+            'sanitized'=>$this->sanitized,
+        ));
+    }
 }
