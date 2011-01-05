@@ -57,7 +57,7 @@ class User extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('first_name, last_name, email, username, password, birthday, gamertag, blurb, datetime_join, hash', 'required'),
+			array('first_name, last_name, email, username, password, birthday, gamertag, blurb', 'required'),
 			array('id_role, active', 'numerical', 'integerOnly'=>true),
 			array('first_name, last_name', 'length', 'max'=>24),
 			array('email, gamertag', 'length', 'max'=>64),
@@ -65,7 +65,7 @@ class User extends CActiveRecord
 			array('phone', 'length', 'max'=>20),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
-			array('id, first_name, last_name, email, username, password, phone, birthday, gamertag, blurb, id_role, datetime_join, active, hash', 'safe', 'on'=>'search'),
+			array('id, first_name, last_name, email, username, phone, birthday, gamertag, blurb, id_role, datetime_join, active', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -77,15 +77,17 @@ class User extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'gameMatches' => array(self::MANY_MANY, 'GameMatch', 'ref_player_match(id_player, id_match)'),
-			'gameTournaments' => array(self::HAS_MANY, 'GameTournament', 'id_owner'),
-			'profileSteam' => array(self::HAS_ONE, 'ProfileSteam', 'id'),
-			'idRole0' => array(self::BELONGS_TO, 'ProfileRole', 'id_role'),
-			'profileXfire' => array(self::HAS_ONE, 'ProfileXfire', 'id'),
-			'refUserEvents' => array(self::HAS_MANY, 'RefUserEvent', 'id_user'),
-			'eventTeams' => array(self::MANY_MANY, 'EventTeam', 'ref_user_team(id_user, id_team)'),
-			'webAlbums' => array(self::HAS_MANY, 'WebAlbum', 'id_user'),
-			'webNews' => array(self::HAS_MANY, 'WebNews', 'id_user'),
+			'matches' => array(self::MANY_MANY, 'Match', 'ref_player_match(id_player, id_match)'),
+			'tournaments' => array(self::HAS_MANY, 'Tournament', 'id_owner'),
+			'winner' => array(self::HAS_MANY, 'Tournament', 'id_winner'),
+			//'steam' => array(self::HAS_ONE, 'ProfileSteam', 'id'),
+			//'xfire' => array(self::HAS_ONE, 'ProfileXfire', 'id'),
+			'role' => array(self::BELONGS_TO, 'Role', 'id_role'),
+			'events' => array(self::MANY_MANY, 'Event', 'ref_user_event(id_user, id_event)'),
+			'teams' => array(self::MANY_MANY, 'Team', 'ref_user_team(id_user, id_team)'),
+			'teamCaptain' => array(self::HAS_MANY, 'Team', 'id_captain'),
+			//'webAlbums' => array(self::HAS_MANY, 'WebAlbum', 'id_user'),
+			//'webNews' => array(self::HAS_MANY, 'WebNews', 'id_user'),
 		);
 	}
 
@@ -105,8 +107,8 @@ class User extends CActiveRecord
 			'birthday' => 'Birthday',
 			'gamertag' => 'Gamertag',
 			'blurb' => 'Blurb',
-			'id_role' => 'Id Role',
-			'datetime_join' => 'Datetime Join',
+			'id_role' => 'Role',
+			'datetime_join' => 'Join Date',
 			'active' => 'Active',
 			'hash' => 'Hash',
 		);
@@ -128,7 +130,6 @@ class User extends CActiveRecord
 		$criteria->compare('last_name',$this->last_name,true);
 		$criteria->compare('email',$this->email,true);
 		$criteria->compare('username',$this->username,true);
-		$criteria->compare('password',$this->password,true);
 		$criteria->compare('phone',$this->phone,true);
 		$criteria->compare('birthday',$this->birthday,true);
 		$criteria->compare('gamertag',$this->gamertag,true);
@@ -136,10 +137,19 @@ class User extends CActiveRecord
 		$criteria->compare('id_role',$this->id_role);
 		$criteria->compare('datetime_join',$this->datetime_join,true);
 		$criteria->compare('active',$this->active);
-		$criteria->compare('hash',$this->hash,true);
 
 		return new CActiveDataProvider(get_class($this), array(
 			'criteria'=>$criteria,
 		));
 	}
+	
+	public function validatePassword($password)
+    {
+        return $this->hashPassword($password)===$this->password;
+    }
+ 
+    public function hashPassword($password)
+    {
+        return md5($password);
+    }
 }
