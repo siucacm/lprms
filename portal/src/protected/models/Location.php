@@ -62,7 +62,7 @@ class Location extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'eventMains' => array(self::HAS_MANY, 'EventMain', 'id_location'),
+			'event' => array(self::HAS_MANY, 'Event', 'id_location'),
 		);
 	}
 
@@ -110,5 +110,29 @@ class Location extends CActiveRecord
 		return new CActiveDataProvider(get_class($this), array(
 			'criteria'=>$criteria,
 		));
+	}
+	
+	public function getAddress()
+	{
+		$result = '';
+		$array = array($this->address1, $this->address2, $this->city, $this->state, $this->zip, $this->country);
+		foreach ($array as $value)
+			if ($value != '') {
+				if ($result != '') $result .= '<br />';
+				$result .= $value;
+			}
+		return $result;
+	}
+	
+	public function getLocation()
+	{
+		$result = '';
+		$array = array($this->floor, $this->room);
+		foreach ($array as $value)
+			if ($value != '') {
+				if ($result != '') $result .= ', ';
+				$result .= $value;
+			}
+		return $result;
 	}
 }

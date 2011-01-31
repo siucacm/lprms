@@ -1,4 +1,5 @@
 Options +FollowSymLinks
+Deny from 95.108.128.242
 IndexIgnore */*
 RewriteEngine on
 

@@ -20,18 +20,28 @@
  * @property string $hash
  *
  * The followings are the available model relations:
- * @property GameMatch[] $gameMatches
- * @property GameTournament[] $gameTournaments
- * @property ProfileSteam $profileSteam
- * @property ProfileRole $idRole0
- * @property ProfileXfire $profileXfire
- * @property RefUserEvent[] $refUserEvents
- * @property EventTeam[] $eventTeams
+ * @property Match[] $matches
+ * @property Tournament[] $tournaments
+ * @property Steam $steam
+ * @property Role $role
+ * @property Xfire $xfire
+ * @property Event[] $events
+ * @property Team[] $teams
  * @property WebAlbum[] $webAlbums
  * @property WebNews[] $webNews
  */
 class User extends CActiveRecord
 {
+	private $_day = NULL;
+	private $_month = NULL;
+	private $_year = NULL;
+	
+	const IMG_GRAVATAR = 0;
+	const IMG_CUSTOM = 1;
+	const IMG_STEAM = 2;
+	const IMG_XFIRE = 3;
+	const IMG_LIVE = 4;
+
 	/**
 	 * Returns the static model of the specified AR class.
 	 * @return User the static model class
@@ -57,15 +67,18 @@ class User extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('first_name, last_name, email, username, password, birthday, gamertag, blurb', 'required'),
-			array('id_role, active', 'numerical', 'integerOnly'=>true),
+			array('first_name, last_name, email, username', 'required'),
+			array('email', 'email'),
+			array('email, username', 'unique'),
+			array('day, month, year, img_type', 'numerical'),
 			array('first_name, last_name', 'length', 'max'=>24),
 			array('email, gamertag', 'length', 'max'=>64),
-			array('username, password, hash', 'length', 'max'=>32),
+			array('username, hash', 'length', 'max'=>32),
 			array('phone', 'length', 'max'=>20),
+			array('blurb', 'length', 'max'=>2048),
 			// The following rule is used by search().
 			// Please remove those attributes that should not be searched.
-			array('id, first_name, last_name, email, username, phone, birthday, gamertag, blurb, id_role, datetime_join, active', 'safe', 'on'=>'search'),
+			array('id, first_name, last_name, email, username, gamertag', 'safe', 'on'=>'search'),
 		);
 	}
 
@@ -80,8 +93,8 @@ class User extends CActiveRecord
 			'matches' => array(self::MANY_MANY, 'Match', 'ref_player_match(id_player, id_match)'),
 			'tournaments' => array(self::HAS_MANY, 'Tournament', 'id_owner'),
 			'winner' => array(self::HAS_MANY, 'Tournament', 'id_winner'),
-			//'steam' => array(self::HAS_ONE, 'ProfileSteam', 'id'),
-			//'xfire' => array(self::HAS_ONE, 'ProfileXfire', 'id'),
+			'steam' => array(self::HAS_ONE, 'Steam', 'id'),
+			'xfire' => array(self::HAS_ONE, 'XFire', 'id'),
 			'role' => array(self::BELONGS_TO, 'Role', 'id_role'),
 			'events' => array(self::MANY_MANY, 'Event', 'ref_user_event(id_user, id_event)'),
 			'teams' => array(self::MANY_MANY, 'Team', 'ref_user_team(id_user, id_team)'),
@@ -103,14 +116,17 @@ class User extends CActiveRecord
 			'email' => 'Email',
 			'username' => 'Username',
 			'password' => 'Password',
+			'password1' => 'Password',
+			'password2' => 'Confirm Password',
 			'phone' => 'Phone',
 			'birthday' => 'Birthday',
-			'gamertag' => 'Gamertag',
+			'gamertag' => 'Display Name',
 			'blurb' => 'Blurb',
 			'id_role' => 'Role',
 			'datetime_join' => 'Join Date',
 			'active' => 'Active',
-			'hash' => 'Hash',
+			'hash' => 'Confirmation Code',
+			'img_type' => 'Avatar Type',
 		);
 	}
 
@@ -143,6 +159,51 @@ class User extends CActiveRecord
 		));
 	}
 	
+	public function register()
+	{
+		$this->password = $this->hashPassword($this->password1);
+		$this->hash = md5(rand());
+		$this->birthday = $this->year.'-'.$this->month.'-'.$this->day;
+		$this->datetime_join = date('Y-m-d');
+		if ($this->save()) {
+			mail(
+				$this->email,
+				'Registration details to '.Yii::app()->name,
+'Dear '.$this->username.',
+
+Thank you for your interest in '.Yii::app()->name.'! Your credentials are as follows:
+Username: '.$this->username.'
+E-mail: '.$this->email.'
+Password: <not disclosed>
+
+You may click on the following link (http://'.$_SERVER['SERVER_NAME'].Yii::app()->request->getBaseUrl().'/account/confirm/'.$this->hash.') to activate your account, or enter the code ('.$this->hash.') at http://'.$_SERVER['SERVER_NAME'].Yii::app()->request->getBaseUrl().'/account/confirm . From there, you can then register for events and tournaments.
+
+If this is not you, feel free to disregard this e-mail.
+
+Sincerely,
+SalukiLAN Team
+',
+				'From: '.Yii::app()->params['adminEmail']
+			);
+		}
+	}
+	
+	public function confirm()
+	{
+		$this->active = 1;
+		if ($this->steam == NULL) {
+			$steam = new Steam;
+			$steam->id = $this->id;
+			$steam->save();
+		}
+		if ($this->xfire == NULL) {
+			$xfire = new XFire;
+			$xfire->id = $this->id;
+			$xfire->save();
+		}
+		$this->save();
+	}
+	
 	public function validatePassword($password)
     {
         return $this->hashPassword($password)===$this->password;
@@ -152,4 +213,112 @@ class User extends CActiveRecord
     {
         return md5($password);
     }
+	
+	public function getUrl()
+	{
+		return Yii::app()->createUrl('user/view', array(
+            'username'=>$this->username,
+        ));
+	}
+	
+	public function getImg($size = 100)
+	{
+		return '<img src="'.$this->avatar.'" width="'.$size.'" height="'.$size.'" title="'.$this->username.'"/>';
+	}
+	
+	public function __get($value) {
+		switch ($value) {
+			case 'day': 
+				if ($this->_day === NULL)
+					$this->_day = (date('d',strtotime($this->birthday))+0);
+				return $this->_day;
+			case 'month':
+				if ($this->_month=== NULL)
+					$this->_month = (date('m',strtotime($this->birthday))+0);
+				return $this->_month;
+			case 'year':
+				if ($this->_year === NULL)
+					$this->_year = (date('Y',strtotime($this->birthday))+0);
+				return $this->_year;
+			default: return parent::__get($value);
+		}
+	}
+	
+	public function __set($name, $value) {
+		switch ($name) {
+			case 'day': $this->_day = $value;
+				$birthday = date('Y-m-',strtotime($this->birthday)).sprintf('%02d',$value);
+				break;
+			case 'month': $this->_month = $value;
+				$birthday = date('Y-',strtotime($this->birthday)).sprintf('%02d',$value).date('-d',strtotime($this->birthday));
+				break;
+			case 'year': $this->_year = $value;
+				$birthday = sprintf('%02d',$value).date('-m-d',strtotime($this->birthday));
+				break;
+			default: parent::__set($name, $value);
+		}
+	}
+	
+	public function getSteamAvatar() {
+		if ($this->steam != null && $this->steam->iconFull != '') return $this->steam->iconFull;
+		return $this->unknown;
+	}
+	
+	public function getXfireAvatar() {
+		if ($this->xfire != null && $this->xfire->icon != '') return $this->xfire->icon;
+		return $this->unknown;
+	}
+	
+	public function getGravatar() {
+		return 'http://www.gravatar.com/avatar/'.md5($this->email).'.jpg?d=retro&s=100';
+	}
+	
+	public function getUnknown() {
+		return 'http://www.gravatar.com/avatar/'.md5($this->email).'.jpg?d=retro&s=100&f=y';
+	}
+	
+	public static function dayList() {
+		$array = array();
+		for ($i = 1; $i <= 31; $i++) {
+			$array["$i"] = $i;
+		}
+		return $array;
+	}
+	
+	public static function monthList() {
+		$array = array();
+		for ($i = 1; $i <= 12; $i++) {
+			$date = new DateTime('2000-'.sprintf('%02d',$i).'-01');
+			$array["$i"] = date_format($date, 'F');
+		}
+		return $array;
+	}
+	
+	public static function yearList() {
+		$array = array();
+		for ($i = date('Y'); $i >= 1950; $i--) {
+			$array["$i"] = $i;
+		}
+		return $array;
+	}
+	
+	public static function imgTypeList() {
+		return array(User::IMG_GRAVATAR => 'Gravatar',
+			User::IMG_CUSTOM => 'Custom',
+			User::IMG_STEAM => 'Steam',
+			User::IMG_XFIRE => 'XFire',
+			User::IMG_LIVE => 'Live',
+		);
+	}
+	
+	public function getAvatar()
+	{
+		switch ($this->img_type)
+		{
+			case User::IMG_GRAVATAR: return $this->gravatar;
+			case User::IMG_STEAM: return $this->steamAvatar;
+			case User::IMG_XFIRE: return $this->xfireAvatar;
+			default: return $this->unknown;
+		}
+	}
 }

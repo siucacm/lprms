@@ -1,9 +1,9 @@
 <div class="view">
 	<div style="float: left; margin-right: 20px;">
-		<?php echo CHtml::link($data->img, array('view', 'username'=>$data->username)); ?>
+		<?php echo CHtml::link($data->img, array('/people/'.$data->username)); ?>
 	</div>
 	<div style="height: 100px; margin-left: 10px;">
-	<b><?php echo CHtml::link(CHtml::encode($data->gamertag), array('view', 'username'=>$data->username)); ?></b><br />
+	<b><?php echo CHtml::link(CHtml::encode($data->gamertag), array('/people/'.$data->username)); ?></b><br />
 	<?php if ($data->steam != null) echo CHtml::encode($data->steam->id_username); ?><br />
 	<?php if ($data->xfire != null) echo CHtml::encode($data->xfire->username); ?><br />
 	Registered for <?php echo count($data->events); ?> event(s)

@@ -27,11 +27,11 @@ class UserController extends Controller
 	{
 		return array(
 			array('allow',  // allow all users to perform 'index' and 'view' actions
-				'actions'=>array('index','view'),
+				'actions'=>array('index','view','confirm','active'),
 				'users'=>array('*'),
 			),
 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
-				'actions'=>array('create','update'),
+				'actions'=>array('create','update','dashboard'),
 				'users'=>array('@'),
 			),
 			array('allow', // allow admin user to perform 'admin' and 'delete' actions
@@ -48,13 +48,14 @@ class UserController extends Controller
 	 * Displays a particular model.
 	 * @param integer $id the ID of the model to be displayed
 	 */
-	public function actionView($id)
+
+	public function actionView()
 	{
+		$post=$this->loadModel();
 		$this->render('view',array(
-			'model'=>$this->loadModel($id),
+			'model'=>$post,
 		));
 	}
-
 
 	/**
 	 * Creates a new model.
@@ -141,8 +142,7 @@ class UserController extends Controller
 	{
 		$model=new User('search');
 		$model->unsetAttributes();  // clear any default values
-		if(isset($_GET['User']))
-			$model->attributes=$_GET['User'];
+		if(isset($_GET['User'])) $model->attributes=$_GET['User'];
 
 		$this->render('admin',array(
 			'model'=>$model,
@@ -154,8 +154,22 @@ class UserController extends Controller
 	 * If the data model is not found, an HTTP exception will be raised.
 	 * @param integer the ID of the model to be loaded
 	 */
-	public function loadModel($id)
+	public function loadModel($id = null)
 	{
+		if ($id === null) {
+			$model = null;
+			if(isset($_GET['id']))
+			{
+				$model=User::model()->findByPk((int)$_GET['id']);
+			}
+			else if(isset($_GET['username']))
+			{
+				$model=User::model()->find('username=:username', array(':username'=>$_GET['username']));
+			}
+			if($model===null)
+				throw new CHttpException(404,'The requested page does not exist.');
+			return $model;
+		}
 		$model=User::model()->findByPk((int)$id);
 		if($model===null)
 			throw new CHttpException(404,'The requested page does not exist.');

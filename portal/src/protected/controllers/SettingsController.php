@@ -1,6 +1,6 @@
 <?php
 
-class EventController extends Controller
+class SettingsController extends Controller
 {
 	/**
 	 * @var string the default layout for the views. Defaults to '//layouts/column2', meaning
@@ -30,12 +30,12 @@ class EventController extends Controller
 				'actions'=>array('index','view'),
 				'users'=>array('*'),
 			),
-/* 			array('allow', // allow authenticated user to perform 'create' and 'update' actions
+			array('allow', // allow authenticated user to perform 'create' and 'update' actions
 				'actions'=>array('create','update'),
 				'users'=>array('@'),
-			), */
+			),
 			array('allow', // allow admin user to perform 'admin' and 'delete' actions
-				'actions'=>array('admin','create','update','delete'),
+				'actions'=>array('admin','delete'),
 				'users'=>array('admin'),
 			),
 			array('deny',  // deny all users
@@ -48,34 +48,11 @@ class EventController extends Controller
 	 * Displays a particular model.
 	 * @param integer $id the ID of the model to be displayed
 	 */
-	
-	public function actionView()
+	public function actionView($id)
 	{
-		$post=$this->loadModel();
 		$this->render('view',array(
-			'model'=>$post,
+			'model'=>$this->loadModel($id),
 		));
-	}
-	 
-	 /**
-	 * Returns the data model based on the primary key given in the GET variable.
-	 * If the data model is not found, an HTTP exception will be raised.
-	 * @param integer the ID of the model to be loaded
-	 */
-	public function loadModel()
-	{
-		$model = null;
-		if(isset($_GET['id']))
-		{
-			$model=Event::model()->findByPk($_GET['id']);
-		}
-		else if(isset($_GET['sanitized']))
-		{
-			$model=Event::model()->find('sanitized=:sanitized', array(':sanitized'=>$_GET['sanitized']));
-		}
-		if($model===null)
-			throw new CHttpException(404,'The requested page does not exist.');
-		return $model;
 	}
 
 	/**
@@ -84,16 +61,16 @@ class EventController extends Controller
 	 */
 	public function actionCreate()
 	{
-		$model=new Event;
+		$model=new Settings;
 
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 
-		if(isset($_POST['Event']))
+		if(isset($_POST['Settings']))
 		{
-			$model->attributes=$_POST['Event'];
+			$model->attributes=$_POST['Settings'];
 			if($model->save())
-				$this->redirect(array('view','id'=>$model->id));
+				$this->redirect(array('view','id'=>$model->key));
 		}
 
 		$this->render('create',array(
@@ -113,11 +90,11 @@ class EventController extends Controller
 		// Uncomment the following line if AJAX validation is needed
 		// $this->performAjaxValidation($model);
 
-		if(isset($_POST['Event']))
+		if(isset($_POST['Settings']))
 		{
-			$model->attributes=$_POST['Event'];
+			$model->attributes=$_POST['Settings'];
 			if($model->save())
-				$this->redirect(array('view','id'=>$model->id));
+				$this->redirect(array('view','id'=>$model->key));
 		}
 
 		$this->render('update',array(
@@ -150,19 +127,9 @@ class EventController extends Controller
 	 */
 	public function actionIndex()
 	{
-		$criteria1=new CDbCriteria(array(
-			'order'=>'datetime_start DESC',
-			'condition'=>'datetime_start > NOW()',
-		));
-		$dataProvider1=new CActiveDataProvider('Event', array('criteria'=>$criteria1));
-		$criteria2=new CDbCriteria(array(
-			'order'=>'datetime_start DESC',
-			'condition'=>'datetime_start < NOW()',
-		));
-		$dataProvider2=new CActiveDataProvider('Event', array('criteria'=>$criteria2));
+		$dataProvider=new CActiveDataProvider('Settings');
 		$this->render('index',array(
-			'dataProvider1'=>$dataProvider1,
-			'dataProvider2'=>$dataProvider2,
+			'dataProvider'=>$dataProvider,
 		));
 	}
 
@@ -171,14 +138,27 @@ class EventController extends Controller
 	 */
 	public function actionAdmin()
 	{
-		$model=new Event('search');
+		$model=new Settings('search');
 		$model->unsetAttributes();  // clear any default values
-		if(isset($_GET['Event']))
-			$model->attributes=$_GET['Event'];
+		if(isset($_GET['Settings']))
+			$model->attributes=$_GET['Settings'];
 
 		$this->render('admin',array(
 			'model'=>$model,
 		));
+	}
+
+	/**
+	 * Returns the data model based on the primary key given in the GET variable.
+	 * If the data model is not found, an HTTP exception will be raised.
+	 * @param integer the ID of the model to be loaded
+	 */
+	public function loadModel($id)
+	{
+		$model=Settings::model()->findByPk((int)$id);
+		if($model===null)
+			throw new CHttpException(404,'The requested page does not exist.');
+		return $model;
 	}
 
 	/**
@@ -187,7 +167,7 @@ class EventController extends Controller
 	 */
 	protected function performAjaxValidation($model)
 	{
-		if(isset($_POST['ajax']) && $_POST['ajax']==='event-form')
+		if(isset($_POST['ajax']) && $_POST['ajax']==='settings-form')
 		{
 			echo CActiveForm::validate($model);
 			Yii::app()->end();

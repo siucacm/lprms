@@ -16,32 +16,35 @@
 
 <body>
 	<div id="header">
-		<div class="title"><?php echo CHtml::encode(Yii::app()->name); ?></div>
-		<div class="tagline"><?php $this->widget('zii.widgets.CBreadcrumbs', array('links'=>$this->breadcrumbs, )); ?></div>
+		<div class="title"><?php //echo CHtml::encode(Yii::app()->name); ?></div>
+		<div class="tagline"></div>
 	</div>
 	
+	<!-- begin content -->
 	<?php echo $content; ?>
+	<!-- end content -->
 
 	<div id="footer">
 		Copyright &copy; <?php echo date('Y'); ?> by SIUC ACM.<br/>
 		All Rights Reserved.<br/>
 		<?php echo Yii::powered(); ?>
 	</div><!-- footer -->
-	<div id="sidebar"></div>
 
 	<div id="nav">
 		<?php $this->widget('zii.widgets.CMenu',array(
 			'items'=>array(
 				array('label'=>'Home', 'url'=>array('/site/index')),
-				array('label'=>'Events', 'url'=>array('/events')),
-				//array('label'=>'About', 'url'=>array('/site/page', 'view'=>'about')),
-				//array('label'=>'Contact', 'url'=>array('/site/contact')),
+				array('label'=>'Events', 'url'=>array('/event/index')),
+				array('label'=>'People', 'url'=>array('/user/index')),
+				array('label'=>'Account', 'url'=>array('/account')),
+				array('label'=>'Chat on IRC', 'url'=>array('/site/page', 'view'=>'chat')),
 				array('label'=>'Login', 'url'=>array('/site/login'), 'visible'=>Yii::app()->user->isGuest),
-				array('label'=>'Logout ('.Yii::app()->user->name.')', 'url'=>array('/site/logout'), 'visible'=>!Yii::app()->user->isGuest)
+				array('label'=>'Register', 'url'=>array('/site/register'), 'visible'=>Yii::app()->user->isGuest),
+				array('label'=>'Logout ('.Yii::app()->user->name.')', 'url'=>array('/account/logout'), 'visible'=>!Yii::app()->user->isGuest)
 			),
 		)); ?>
 	</div><!-- mainmenu -->
-	<div id="breadcrumbs"></div><!-- breadcrumbs -->
+	<div id="breadcrumbs"><?php $this->widget('zii.widgets.CBreadcrumbs', array('links'=>$this->breadcrumbs, )); ?></div><!-- breadcrumbs -->
 	
 </body>
 </html>

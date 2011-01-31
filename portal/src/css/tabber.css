@@ -44,27 +44,27 @@ ul.tabbernav li a
  margin-left: 3px;
  border: 1px solid #666;
  border-bottom: none;
- background: #DDD;
+ background: #000;
  text-decoration: none;
 }
 
 ul.tabbernav li a:hover
 {
- color: #000;
- background: #EEE;
- border-color: #000;
+ color: #FFF;
+ background: #300;
+ border-color: #FFF;
 }
 
 ul.tabbernav li.tabberactive a
 {
- background-color: #fff;
+ background-color: #300;
  border-bottom: 1px solid #fff;
 }
 
 ul.tabbernav li.tabberactive a:hover
 {
- color: #000;
- background: white;
+ color: #FFF;
+ background: #300;
  border-bottom: 1px solid white;
 }
 

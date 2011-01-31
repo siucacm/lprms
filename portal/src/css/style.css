@@ -7,6 +7,10 @@
 */
 
 body {
+	background-color: #000000;
+	color: #FFFFFF;
+	background-image: url(/images/bg.png);
+	background-repeat: no-repeat;
     border: 0;
     padding: 0;
     margin: 0;
@@ -18,9 +22,10 @@ root {
 }
 
 #header {
-    height: 100px;
+	background-image: url(/images/logo.png);
+	background-repeat: no-repeat;
+    height: 320px; /*100+220*/
     border-bottom: 1px solid #CCCCCC;
-    background-color: white;
 }
 
 .title {
@@ -41,37 +46,29 @@ root {
     margin-right: 20%;
     padding: 20px;
     font-size: 14px;
-    background-color: white;
     min-height: 384px;
 }
 
 
 #sidebar {
     position: absolute;
-    top: 132px;
+    top: 352px; /*132+220*/
     right: 0;
     width: 20%;
-    background-color: #EEEEEE;
+    background-color: #110000;
     border-bottom: 1px solid #CCCCCC;
     border-left: 1px solid #CCCCCC;
     padding-bottom: 50px;
     min-height: 384px;
 }
 
-#nav {
-    position: absolute;
-    top: 101px;
-    border-bottom: 1px solid #CCCCCC;
-    height: 30px;
-    width: 100%;
-    background-color: white;
-}
-
 #breadcrumbs {
     position: absolute;
-    top: 210px;
-	left: 20px;
+    top: 280px; /*60+220 */
+	left: 40px;
     height: 30px;
+    font-size: small;
+    font-variant: small-caps;
 }
 
 #info {
@@ -85,11 +82,22 @@ root {
 
 #footer {
     margin-top: 30px;
-    border-top: 1px solid black;
+    border-top: 1px solid white;
     padding: 10px 30px;
     text-align: center;
     font-size: 70%;
     font-variant: small-caps;
+}
+
+#nav {
+    position: absolute;
+    top: 321px; /*101+220*/
+    border-bottom: 1px solid #CCCCCC;
+	padding-bottom: 1px;
+    height: 30px;
+    width: 100%;
+    background-color: black;
+	color: #FFFFFF;
 }
 
 #nav ul {
@@ -108,7 +116,8 @@ root {
 }
 
 #nav ul li a:hover, #nav ul li.active a {
-    background-color: #DDDDDD;
+    background-color: #440000;
+	color: #FFFFFF;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -117,27 +126,17 @@ h1, h2, h3, h4, h5, h6 {
     padding-left: 10px;
 }
 
-.textheader {
-    font-variant: small-caps;
-    border-bottom: 1px solid #CCCCCC;
-    padding-left: 10px;
-    margin: 10px 10px 10px 276px;
-    font-weight: bold;
-    display: block;
-    font-size: 150%;
-}
-
 .box {
     padding: 0 20px 10px 20px;
 }
 
 a {
     text-decoration: none;
-    color: black;
+	color: #AAAAAA;
 }
 
 a:hover {
-    color: blue;
+    color: white;
 }
 
 .widget {
@@ -280,17 +279,27 @@ div.search-form
 .portlet-decoration
 {
 	padding: 3px 8px;
-	background: #B7D6E7;
-	border-left: 5px solid #6FACCF;
+	background: #FFFFFF;
+    border-bottom: 1px solid #CCCCCC;
+    border-top: 1px solid #CCCCCC;
 }
 
 .portlet-title
 {
-	font-size: 12px;
+    font-variant: small-caps;
+    font-size: 120%;
 	font-weight: bold;
 	padding: 0;
 	margin: 0;
-	color: #298dcd;
+}
+
+.textheader {
+    font-variant: small-caps;
+    border-bottom: 1px solid #CCCCCC;
+    padding-left: 10px;
+    margin: 10px 10px 10px 276px;
+    font-weight: bold;
+    display: block;
 }
 
 .portlet-content
@@ -298,7 +307,7 @@ div.search-form
 	font-size:0.9em;
 	margin: 0 0 15px 0;
 	padding: 5px 8px;
-	background:#EFFDFF;
+	background: inherit;
 }
 
 .portlet-content ul
@@ -345,4 +354,9 @@ div.search-form
 .operations li a:hover
 {
 	background: #80CFFF;
+}
+
+div.form .rowRadio label
+{
+	display: inline;
 }

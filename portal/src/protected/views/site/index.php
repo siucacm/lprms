@@ -1,16 +1,23 @@
 <?php $this->pageTitle=Yii::app()->name; ?>
 
-<h1>Welcome to <i><?php echo CHtml::encode(Yii::app()->name); ?></i></h1>
+<h1><?php echo CHtml::encode($post->title); ?></h1>
+<small><?php if ($post->author != null) echo 'Posted by '.CHtml::encode($post->author->username);?> | 
+<?php echo CHtml::encode(date('M j, Y @ g:iA', strtotime($post->timestamp))); ?></small>
+<br /><br />
+<?php echo CHtml::encode($post->content); ?>
 
-<p>Congratulations! You have successfully created your Yii application.</p>
+<h2>Latest Events</h2>
+<?php
+foreach ($events as $event) {
 
-<p>You may change the content of this page by modifying the following two files:</p>
-<ul>
-	<li>View file: <tt><?php echo __FILE__; ?></tt></li>
-	<li>Layout file: <tt><?php echo $this->getLayoutFile('main'); ?></tt></li>
-</ul>
+}
+?>
 
-<p>For more details on how to further develop this application, please read
-the <a href="http://www.yiiframework.com/doc/">documentation</a>.
-Feel free to ask in the <a href="http://www.yiiframework.com/forum/">forum</a>,
-should you have any questions.</p>
+<h2>Recent Users</h2>
+<?php
+for ($i = 0; $i < count($users) && $i < 20; $i++) {
+	echo CHtml::link($users[$i]->getImg(32), array('/people/'.$users[$i]->username));
+	echo ' ';
+	if ($i % 5 == 0) echo "\n";
+}
+?>

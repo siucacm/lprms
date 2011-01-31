@@ -12,9 +12,8 @@ $this->breadcrumbs=array(
 <div class="form">
 <?php $form=$this->beginWidget('CActiveForm', array(
 	'id'=>'login-form',
-	'enableAjaxValidation'=>true,
+	'enableAjaxValidation'=>false,
 )); ?>
-
 	<p class="note">Fields with <span class="required">*</span> are required.</p>
 
 	<div class="row">
@@ -27,9 +26,6 @@ $this->breadcrumbs=array(
 		<?php echo $form->labelEx($model,'password'); ?>
 		<?php echo $form->passwordField($model,'password'); ?>
 		<?php echo $form->error($model,'password'); ?>
-		<p class="hint">
-			Hint: You may login with <tt>demo/demo</tt> or <tt>admin/admin</tt>.
-		</p>
 	</div>
 
 	<div class="row rememberMe">
