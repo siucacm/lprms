@@ -11,6 +11,8 @@ body {
 	color: #FFFFFF;
 	background-image: url(/images/bg.png);
 	background-repeat: no-repeat;
+	background-attachment: fixed;
+	background-position: left bottom;
     border: 0;
     padding: 0;
     margin: 0;
@@ -150,26 +152,23 @@ a:hover {
 
 table.table_list {
 	border-collapse: collapse;
-        width: 100%;
+    width: 100%;
+	background-color: #000;
 }
 
 table.table_list th {
-        font-size: 120%;
+    font-size: 120%;
 	font-variant: small-caps;
 	border-top: 1px solid #666666;
-        border-bottom: 2px solid #666666;
-        font-weight: bold;
-        padding: 5px;
+    border-bottom: 2px solid #666666;
+    font-weight: bold;
+    padding: 5px;
 }
 
 table.table_list td {
 	border: 1px #CCCCCC solid;
-        padding: 3px;
-        font-size: 80%;
-}
-
-table.form th {
-    text-align: right;
+    padding: 3px;
+    font-size: 80%;
 }
 
 .location_map {
@@ -279,7 +278,7 @@ div.search-form
 .portlet-decoration
 {
 	padding: 3px 8px;
-	background: #FFFFFF;
+	background: #330000;
     border-bottom: 1px solid #CCCCCC;
     border-top: 1px solid #CCCCCC;
 }

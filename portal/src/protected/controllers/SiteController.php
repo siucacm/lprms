@@ -97,7 +97,10 @@ class SiteController extends Controller
 	
 	public function actionRegister()
 	{
-		$model=new User('register');
+		if (!Yii::app()->user->isGuest) {
+			$this->redirect('/account');
+		}
+		$model=new RegisterForm;
 
 		// uncomment the following code to enable ajax-based validation
 		
@@ -107,16 +110,19 @@ class SiteController extends Controller
 			Yii::app()->end();
 		}
 
-		if(isset($_POST['User']))
+		if(isset($_POST['RegisterForm']))
 		{
-			$model->attributes=$_POST['User'];
-			if($model->validate())
+			$model->attributes=$_POST['RegisterForm'];
+			// validate user input and redirect to the previous page if valid
+			if($model->validate() && $model->process())
 			{
-				$model->register();
-				$this->redirect('/confirm');
+				$model->linkEvents();
+				$this->redirect('/account/confirm');
 			}
 		}
-		$this->render('register',array('model'=>$model));
+		$this->render('register',array(
+			'model'=>$model,
+		));
 	}
 	
 	public function actionDashboard()
@@ -135,9 +141,9 @@ class SiteController extends Controller
 			$model->attributes=$_POST['DashboardForm'];
 			// validate user input and redirect to the previous page if valid
 			if($model->validate() && $model->process())
-				$this->redirect('/account/dashboard');
+				$this->redirect('/account');
 		}
-		else $model->populate();
+		$model->populate();
 		$this->render('dashboard',array(
 			'model'=>$model,
 		));
@@ -165,7 +171,7 @@ class SiteController extends Controller
 				$this->redirect('/account/dashboard/active');
 			}
 		}
-		if(isset($_GET['extra']))
+		else if(isset($_GET['extra']))
 		{
 			$model->confirm=$_GET['extra'];
 			// validate user input and redirect to the previous page if valid
@@ -175,11 +181,61 @@ class SiteController extends Controller
 				$user->confirm();
 				$this->redirect('/account/dashboard/active');
 			}
+			else
+				$this->redirect('/account/login/confirmed');
 		}
 		// display the confirm form
-		$this->render('confirm',array('model'=>$model));
+		else $this->render('confirm',array('model'=>$model));
 	}
 
+	public function actionForget()
+	{
+		$model=new ForgetForm;
+		// if it is ajax validation request
+		if(isset($_POST['ajax']) && $_POST['ajax']==='user-forget-form')
+		{
+			echo CActiveForm::validate($model);
+			Yii::app()->end();
+		}
+
+		// collect user input data
+		if(isset($_POST['ForgetForm']))
+		{
+			$model->attributes=$_POST['ForgetForm'];
+			// validate user input and redirect to the previous page if valid
+			if($model->validate() && $model->resetHash())
+				$this->redirect('/account/reset');
+		}
+		// display the confirm form
+		$this->render('forget',array('model'=>$model));
+	}
+	
+	public function actionReset()
+	{
+		$model=new ResetForm;
+		// if it is ajax validation request
+		if(isset($_POST['ajax']) && $_POST['ajax']==='user-reset-form')
+		{
+			echo CActiveForm::validate($model);
+			Yii::app()->end();
+		}
+
+		// collect user input data
+		if(isset($_POST['ResetForm']))
+		{
+			$model->attributes=$_POST['ResetForm'];
+			// validate user input and redirect to the previous page if valid
+			if($model->validate() && $model->login())
+			{
+				$user = User::model()->find('id=:id', array(':id'=>Yii::app()->user->id));
+				$user->reset($model->password1);
+				$this->redirect('/account/dashboard/active');
+			}
+		}
+		else if(isset($_GET['extra'])) $model->reset=$_GET['extra'];
+		$this->render('reset',array('model'=>$model));
+	}
+	
 	/**
 	 * Logs out the current user and redirect to homepage.
 	 */

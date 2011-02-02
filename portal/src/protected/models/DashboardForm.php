@@ -1,10 +1,5 @@
 <?php
 
-/**
- * LoginForm class.
- * LoginForm is the data structure for keeping
- * user login form data. It is used by the 'login' action of 'SiteController'.
- */
 class DashboardForm extends CFormModel
 {
 	public $first_name;
@@ -29,8 +24,6 @@ class DashboardForm extends CFormModel
 
 	/**
 	 * Declares the validation rules.
-	 * The rules state that username and password are required,
-	 * and password needs to be authenticated.
 	 */
 	public function rules()
 	{
@@ -39,7 +32,7 @@ class DashboardForm extends CFormModel
 			array('password1', 'compare', 'compareAttribute'=>'password2'),
 			array('password2', 'compare', 'compareAttribute'=>'password1'),
 			array('email', 'email'),
-			//array('email', 'unique'), //TODO
+			array('email', 'emailcheck'), //TODO
 			array('day, month, year, img_type, phone, steam_numeric', 'numerical', 'integerOnly'=>true),
 			array('first_name, last_name', 'length', 'max'=>24),
 			array('email, gamertag, steam_id, steam_numeric, xfire_id, live_id', 'length', 'max'=>64),
@@ -63,13 +56,18 @@ class DashboardForm extends CFormModel
 			'gamertag' => 'Display Name',
 			'blurb' => 'Blurb',
 			'img_type' => 'Avatar Image Type',
+			'steam_id' => 'Steam ID',
+			'steam_numeric' => 'Steam Numeric ID',
+			'xfire_id' => 'XFire ID',
+			'live_id' => 'Live ID',
 		);
 	}
 	
 	public function populate()
 	{
 		if (Yii::app()->user->isGuest) return;
-		$this->_user=User::model()->find('id=:id', array(':id'=>Yii::app()->user->id));
+		$this->_user = User::getCurrentUser();
+		//print_r(Yii::app()->user); exit;
 		if ($this->_user == NULL) return;
 		$this->first_name = $this->_user->first_name;
 		$this->last_name = $this->_user->last_name;
@@ -90,7 +88,7 @@ class DashboardForm extends CFormModel
 	public function process()
 	{
 		if (Yii::app()->user->isGuest) return;
-		$this->_user=User::model()->find('id=:id', array(':id'=>Yii::app()->user->id));
+		$this->_user = User::getCurrentUser();
 		if ($this->_user == NULL) return;
 		if ($this->password1 == $this->password2 && $this->password1 != '')
 			$this->_user->password = $this->_user->hashPassword($this->password1);
@@ -104,14 +102,25 @@ class DashboardForm extends CFormModel
 		$this->_user->img_type = $this->img_type;
 		$this->_user->steam->id_username = $this->steam_id;
 		$this->_user->steam->id_numeric = $this->steam_numeric;
-		$this->_user->steam->save();
+		$this->_user->steam->pullXML();
 		$this->_user->xfire->username = $this->xfire_id;
-		$this->_user->xfire->save();
+		$this->_user->xfire->pullXML();
 		$this->_user->save();
 	}
 	
 	public function pullUser()
 	{
 		return $this->_user;
+	}
+	
+	public function emailcheck($attribute, $params)
+	{
+		if (Yii::app()->user->isGuest) return;
+		$this->_user = User::getCurrentUser();
+		if ($this->_user->email == $this->email) return;
+		$this->_user = new User('register');
+		$this->_user->email = $this->email;
+		if (!$this->_user->validate())
+			$this->addError('email','Duplicate email');
 	}
 }

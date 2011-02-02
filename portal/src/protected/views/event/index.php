@@ -11,34 +11,54 @@ $this->admin_menu=array(
 ?>
 
 <h1>Events</h1>
-	<table class="table_list">
-		<tr>
-			<th>Status</th>
-			<th>Event</th>
-			<th>When</th>
-			<th>Duration</th>
-			<th>Location</th>
-			<th>Price</th>
-			<th>Capacity</th>
-		</tr>
-	<?php $this->widget('zii.widgets.CListView', array(
+	<?php 
+	$columnsArray = array(
+		array(
+			'name' => 'status',
+			'value' => '$data->status',
+			'type' => 'raw',
+		),
+		array(
+			'name' => 'name',
+			'header' => 'Event',
+			'value' => 'CHtml::link($data->name, $data->url)',
+			'type' => 'raw',
+		),
+		array(
+			'name' => 'datetime_start',
+			'header' => 'When',
+			'value' => 'Event::getDateTime($data->datetime_start)',
+		),
+		array(
+			'name' => 'duration',
+			'value' => '$data->duration',
+		),
+		array(
+			'name' => 'location',
+			'value' => '($data->location != null)?$data->location->name:""',
+		),
+		array(
+			'name' => 'price',
+			'value' => '($data->price <= 0)?"Free!":"$".$data->price',
+		),
+		array(
+			'name' => 'capacity',
+			'value' => 'count($data->users)." / ".$data->capacity',
+		),
+	); ?>
+	<?php $this->widget('zii.widgets.grid.CGridView', array(
 		'dataProvider'=>$dataProvider1,
-		'itemView'=>'_view',
+		'columns'=> $columnsArray,
+		'itemsCssClass' => 'table_list',
+		'enablePagination' => false,
+		'enableSorting' => false,
 	)); ?>
-	</table>
-	<br /><br />
-		<table class="table_list">
-		<tr>
-			<th>Status</th>
-			<th>Event</th>
-			<th>When</th>
-			<th>Duration</th>
-			<th>Location</th>
-			<th>Price</th>
-			<th>Capacity</th>
-		</tr>
-	<?php $this->widget('zii.widgets.CListView', array(
-		'dataProvider'=>$dataProvider2,
-		'itemView'=>'_view',
-	)); ?>
-	</table>
+<h2>Previous Events</h2>
+	<?php $this->widget('zii.widgets.grid.CGridView', array(
+        'dataProvider'=>$dataProvider2,
+        'columns'=> $columnsArray,
+		'itemsCssClass' => 'table_list',
+		'enablePagination' => false,
+		'enableSorting' => false,
+    )); ?>
+

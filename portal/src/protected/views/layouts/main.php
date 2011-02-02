@@ -31,13 +31,16 @@
 	</div><!-- footer -->
 
 	<div id="nav">
-		<?php $this->widget('zii.widgets.CMenu',array(
+		<?php
+			$this->widget('zii.widgets.CMenu',array(
 			'items'=>array(
 				array('label'=>'Home', 'url'=>array('/site/index')),
+				array('label'=>'News', 'url'=>array('/post/index')),
 				array('label'=>'Events', 'url'=>array('/event/index')),
 				array('label'=>'People', 'url'=>array('/user/index')),
-				array('label'=>'Account', 'url'=>array('/account')),
+				array('label'=>'Account', 'url'=>array('/site/dashboard')),
 				array('label'=>'Chat on IRC', 'url'=>array('/site/page', 'view'=>'chat')),
+				array('label'=>'Administration', 'url'=>array('/site/admin'), 'visible'=>(!Yii::app()->user->isGuest && User::getCurrentUser()->role != NULL && User::getCurrentUser()->role->is_admin)),
 				array('label'=>'Login', 'url'=>array('/site/login'), 'visible'=>Yii::app()->user->isGuest),
 				array('label'=>'Register', 'url'=>array('/site/register'), 'visible'=>Yii::app()->user->isGuest),
 				array('label'=>'Logout ('.Yii::app()->user->name.')', 'url'=>array('/account/logout'), 'visible'=>!Yii::app()->user->isGuest)

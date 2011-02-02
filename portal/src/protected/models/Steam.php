@@ -129,6 +129,53 @@ class Steam extends CActiveRecord
 		));
 	}
 	
+	public function pullXML() {
+		$xml = NULL;
+		if ($this->id_username != '' && $this->id_username != '0')
+		{
+			$url = 'http://steamcommunity.com/id/'.$this->id_username.'?xml=1';
+			$xr = new XMLReader();
+			$xr->open($url);
+			$xml = recurseXML($xr);
+			$xr->close();
+		}
+		if (($xml == NULL || isset($xml['response'])) && ($this->id_numeric == 0))
+		{
+			$this->id_username = NULL;
+			$this->valid = 0;
+			$this->save();
+			return;
+		}
+		else if ($xml == NULL || isset($xml['response']))
+		{
+			$url = 'http://steamcommunity.com/profiles/'.$this->id_numeric.'?xml=1';
+			$xr = new XMLReader();
+			$xr->open($url);
+			$xml = recurseXML($xr);
+			$xr->close();
+			if (isset($xml['response']))
+			{
+				$this->valid = 0;
+				$this->save();
+				return;
+			}
+		}
+		$this->id_username = $xml['profile']['customURL'];
+		$this->id_numeric = $xml['profile']['steamID64'];
+		$this->display = $xml['profile']['steamID'];
+		$this->realname = $xml['profile']['realname'];
+		$this->online = ($xml['profile']['onlineState'] == 'online')?1:0;
+		$this->state = $xml['profile']['stateMessage'];
+		$this->iconFull = $xml['profile']['avatarFull'];
+		$this->iconMedium = $xml['profile']['avatarMedium'];
+		$this->icon = $xml['profile']['avatarIcon'];
+		$this->headline = $xml['profile']['headline'];
+		$this->summary = $xml['profile']['summary'];
+		$this->rating = $xml['profile']['steamRating'];
+		$this->valid = 1;
+		$this->save();
+	}
+	
 	public function getUrl() {
 		if ($this->id_username != null) return 'http://steamcommunity.com/id/'.$this->id_username;
 		if ($this->id_numeric != null) return 'http://steamcommunity.com/profiles'.$this->id_numeric;

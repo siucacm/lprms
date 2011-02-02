@@ -50,8 +50,8 @@ $this->breadcrumbs=array(
 				<?php echo $form->error($model,'email'); ?>
 			</div>
 
-			<div class="row">
-				<div style="width: 100px; float: left;">
+			<div class="row" style="height: 60px">
+				<div style="width: 250px; float: left;">
 					<?php echo $form->labelEx($model,'password1'); ?>
 					<?php echo $form->passwordField($model,'password1'); ?>
 					<?php echo $form->error($model,'password1'); ?>
@@ -129,6 +129,7 @@ $this->breadcrumbs=array(
         <div class="tabbertab" title="Events">
         </div>
         <div class="tabbertab" title="Tournaments">
+		Coming Soon
         </div>
     </div>
 </div>

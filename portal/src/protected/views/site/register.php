@@ -13,6 +13,8 @@ $this->breadcrumbs=array(
 	'enableAjaxValidation'=>true,
 )); ?>
 
+	<p class="note">Forgot your password? <?php echo CHtml::link('Click here to reset your password.', '/account/forget'); ?></p>
+
 	<p class="note">Fields with <span class="required">*</span> are required.</p>
 
 	<?php echo $form->errorSummary($model); ?>
@@ -29,15 +31,15 @@ $this->breadcrumbs=array(
 		<?php echo $form->error($model,'email'); ?>
 	</div>
 
-	<div class="row">
-		<div style="width: 100px; float: left;">
+	<div class="row" style="height: 60px">
+		<div style="width: 200px; float: left;">
 			<?php echo $form->labelEx($model,'password1'); ?>
 			<?php echo $form->passwordField($model,'password1'); ?>
 			<?php echo $form->error($model,'password1'); ?>
 		</div>
 		
 		<div style="margin-left: 300px;">
-			<?php echo $form->labelEx($model,'password2'); ?>
+			<?php echo $form->labelEx($model,'dummylabel'); ?>
 			<?php echo $form->passwordField($model,'password2'); ?>
 			<?php echo $form->error($model,'password2'); ?>
 		</div>
@@ -77,6 +79,10 @@ $this->breadcrumbs=array(
 		<?php echo $form->error($model,'phone'); ?>
 	</div>
 
+	<h2>Which events do you want to attend?</h2>
+	<div class="rowRadio">
+		<?php $model->showActiveEvents($form); ?>
+	</div>
 
 	<div class="row buttons">
 		<?php echo CHtml::submitButton('Register'); ?>

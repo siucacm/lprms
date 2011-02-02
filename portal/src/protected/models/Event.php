@@ -45,6 +45,10 @@ class Event extends CActiveRecord
 	{
 		return 'event_main';
 	}
+	public function behaviors(){
+		return array( 'CAdvancedArBehavior' => array(
+			'class' => 'application.extensions.CAdvancedArBehavior'));
+	}
 
 	/**
 	 * @return array validation rules for model attributes.
@@ -78,7 +82,7 @@ class Event extends CActiveRecord
 			'prizes' => array(self::HAS_MANY, 'Prize', 'id_event'),
 			'matches' => array(self::HAS_MANY, 'Match', 'id_event'),
 			'tournaments' => array(self::HAS_MANY, 'Tournament', 'id_event'),
-			'users' => array(self::MANY_MANY, 'User', 'ref_user_event(id_user, id_event)'),
+			'users' => array(self::MANY_MANY, 'User', 'ref_user_event(id_event, id_user)'),
 			//'webAlbums' => array(self::HAS_MANY, 'WebAlbum', 'id_event'),
 		);
 	}
@@ -149,8 +153,8 @@ class Event extends CActiveRecord
 
 		$units = array
 			(
-				"week"   => 604800,   // seconds in a week   (7 days)
-				"day"    => 86400,    // seconds in a day    (24 hours)
+				//"week"   => 604800,   // seconds in a week   (7 days)
+				//"day"    => 86400,    // seconds in a day    (24 hours)
 				"hour"   => 3600,     // seconds in an hour  (60 minutes)
 				"minute" => 60,       // seconds in a minute (60 seconds)
 				"second" => 1         // 1 second
@@ -175,5 +179,58 @@ class Event extends CActiveRecord
 	{
 		$to = strtotime($this->datetime_end);
 		return ($to > time());
+	}
+	
+	public static function getActiveEvents()
+	{
+		return Event::model()->findAll('datetime_end > NOW()');
+	}
+	
+	public function getStatus()
+	{
+		if ($this->active != 1) return 'Expired';
+		if (Yii::app()->user->isGuest) return '';
+		$events = User::getCurrentUser()->events;
+		foreach ($events as $event) {
+			if ($event->id == $this->id) {
+				return $this->linkLeave;
+			}
+		}
+		return $this->linkJoin;
+	}
+	
+	public function getLinkLeave()
+	{
+		return CHtml::link('Leave', $this->url.'/leave');
+	}
+	
+	public function getLinkJoin()
+	{
+		return CHtml::link('Join', $this->url.'/join');
+	}
+	
+	public function getDetailedStatus()
+	{
+		if (Yii::app()->user->isGuest) return '';
+		$events = User::getCurrentUser()->events;
+		foreach ($events as $event) {
+			if ($event->id == $this->id) {
+				return 'You are registered for this event.'.(($this->active == 1)?' Changed your mind? '.$this->linkLeave.' now.':'');
+			}
+		}
+		return 'You are not registered for this event.'.(($this->active == 1)?'.. why not '.$this->linkJoin.'?':'');
+	}
+	
+	public static function getDateTime($datetime)
+	{
+		return date('M j, Y @ g:iA', strtotime($datetime));
+	}
+	public static function getDate($date)
+	{
+		return date('M j, Y', strtotime($datetime));
+	}
+	public static function getTime($time)
+	{
+		return date('g:iA', strtotime($datetime));
 	}
 }

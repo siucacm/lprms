@@ -60,7 +60,7 @@ class XFire extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'id0' => array(self::BELONGS_TO, 'ProfileUser', 'id'),
+			'user' => array(self::BELONGS_TO, 'User', 'id'),
 		);
 	}
 
@@ -102,5 +102,26 @@ class XFire extends CActiveRecord
 		return new CActiveDataProvider(get_class($this), array(
 			'criteria'=>$criteria,
 		));
+	}
+	
+	public function pullXML() {
+		$url = 'http://www.xfire.com/xml/'.$this->username.'/profile/';
+		$xr = new XMLReader();
+		$xr->open($url);
+		$xml = recurseXML($xr);
+		$xr->close();
+		if (isset($xml['xfire']['error']))
+		{
+			$this->valid = 0;
+			$this->save();
+			return;
+		}
+		$this->username = $xml['xfire']['username'];
+		$this->display = $xml['xfire']['nickname'];
+		$this->realname = $xml['xfire']['realname'];
+		$this->online = ($xml['xfire']['status'] == 'online')?1:0;
+		$this->icon = $xml['xfire']['avatar'];
+		$this->valid = 1;
+		$this->save();
 	}
 }

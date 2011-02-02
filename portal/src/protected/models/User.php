@@ -58,6 +58,11 @@ class User extends CActiveRecord
 	{
 		return 'profile_user';
 	}
+	
+	public function behaviors(){
+		return array( 'CAdvancedArBehavior' => array(
+			'class' => 'application.extensions.CAdvancedArBehavior'));
+	}
 
 	/**
 	 * @return array validation rules for model attributes.
@@ -67,9 +72,11 @@ class User extends CActiveRecord
 		// NOTE: you should only define rules for those attributes that
 		// will receive user inputs.
 		return array(
-			array('first_name, last_name, email, username', 'required'),
+			//array('first_name, last_name, email, username', 'required'),
 			array('email', 'email'),
-			array('email, username', 'unique'),
+			array('username, email', 'unique', 'on' => 'register'),
+			array('hash', 'unique', 'on' => 'postregister'),
+			array('email', 'unique', 'on' => 'edit'),
 			array('day, month, year, img_type', 'numerical'),
 			array('first_name, last_name', 'length', 'max'=>24),
 			array('email, gamertag', 'length', 'max'=>64),
@@ -90,15 +97,15 @@ class User extends CActiveRecord
 		// NOTE: you may need to adjust the relation name and the related
 		// class name for the relations automatically generated below.
 		return array(
-			'matches' => array(self::MANY_MANY, 'Match', 'ref_player_match(id_player, id_match)'),
-			'tournaments' => array(self::HAS_MANY, 'Tournament', 'id_owner'),
-			'winner' => array(self::HAS_MANY, 'Tournament', 'id_winner'),
+			//'matches' => array(self::MANY_MANY, 'Match', 'ref_player_match(id_player, id_match)'),
+			//'tournaments' => array(self::HAS_MANY, 'Tournament', 'id_owner'),
+			//'winner' => array(self::HAS_MANY, 'Tournament', 'id_winner'),
 			'steam' => array(self::HAS_ONE, 'Steam', 'id'),
 			'xfire' => array(self::HAS_ONE, 'XFire', 'id'),
 			'role' => array(self::BELONGS_TO, 'Role', 'id_role'),
 			'events' => array(self::MANY_MANY, 'Event', 'ref_user_event(id_user, id_event)'),
-			'teams' => array(self::MANY_MANY, 'Team', 'ref_user_team(id_user, id_team)'),
-			'teamCaptain' => array(self::HAS_MANY, 'Team', 'id_captain'),
+			//'teams' => array(self::MANY_MANY, 'Team', 'ref_user_team(id_user, id_team)'),
+			//'teamCaptain' => array(self::HAS_MANY, 'Team', 'id_captain'),
 			//'webAlbums' => array(self::HAS_MANY, 'WebAlbum', 'id_user'),
 			//'webNews' => array(self::HAS_MANY, 'WebNews', 'id_user'),
 		);
@@ -116,8 +123,6 @@ class User extends CActiveRecord
 			'email' => 'Email',
 			'username' => 'Username',
 			'password' => 'Password',
-			'password1' => 'Password',
-			'password2' => 'Confirm Password',
 			'phone' => 'Phone',
 			'birthday' => 'Birthday',
 			'gamertag' => 'Display Name',
@@ -161,31 +166,9 @@ class User extends CActiveRecord
 	
 	public function register()
 	{
-		$this->password = $this->hashPassword($this->password1);
-		$this->hash = md5(rand());
-		$this->birthday = $this->year.'-'.$this->month.'-'.$this->day;
+		$this->hash = User::generateUniqueHash();
 		$this->datetime_join = date('Y-m-d');
-		if ($this->save()) {
-			mail(
-				$this->email,
-				'Registration details to '.Yii::app()->name,
-'Dear '.$this->username.',
-
-Thank you for your interest in '.Yii::app()->name.'! Your credentials are as follows:
-Username: '.$this->username.'
-E-mail: '.$this->email.'
-Password: <not disclosed>
-
-You may click on the following link (http://'.$_SERVER['SERVER_NAME'].Yii::app()->request->getBaseUrl().'/account/confirm/'.$this->hash.') to activate your account, or enter the code ('.$this->hash.') at http://'.$_SERVER['SERVER_NAME'].Yii::app()->request->getBaseUrl().'/account/confirm . From there, you can then register for events and tournaments.
-
-If this is not you, feel free to disregard this e-mail.
-
-Sincerely,
-SalukiLAN Team
-',
-				'From: '.Yii::app()->params['adminEmail']
-			);
-		}
+		if ($this->save()) $this->mailRegistration();
 	}
 	
 	public function confirm()
@@ -201,6 +184,14 @@ SalukiLAN Team
 			$xfire->id = $this->id;
 			$xfire->save();
 		}
+		$this->hash = NULL;
+		$this->save();
+	}
+	
+	public function reset($password)
+	{
+		$this->hash = NULL;
+		$this->password = $this->hashPassword($password);
 		$this->save();
 	}
 	
@@ -260,12 +251,12 @@ SalukiLAN Team
 	}
 	
 	public function getSteamAvatar() {
-		if ($this->steam != null && $this->steam->iconFull != '') return $this->steam->iconFull;
+		if ($this->steam != null && $this->steam->valid) return $this->steam->iconFull;
 		return $this->unknown;
 	}
 	
 	public function getXfireAvatar() {
-		if ($this->xfire != null && $this->xfire->icon != '') return $this->xfire->icon;
+		if ($this->xfire != null && $this->xfire->valid) return $this->xfire->icon;
 		return $this->unknown;
 	}
 	
@@ -311,6 +302,23 @@ SalukiLAN Team
 		);
 	}
 	
+	public static function generateUniqueHash() {
+		$result = false;
+		$hash = '';
+		while (!$result) {
+			$hash = md5(rand());
+			$user = new User('postregister');
+			$user->hash = $hash;
+			$result = $user->validate();
+		}
+		return $hash;
+	}
+	
+	public function getLiveCard()
+	{
+		//if (
+	}
+	
 	public function getAvatar()
 	{
 		switch ($this->img_type)
@@ -318,7 +326,91 @@ SalukiLAN Team
 			case User::IMG_GRAVATAR: return $this->gravatar;
 			case User::IMG_STEAM: return $this->steamAvatar;
 			case User::IMG_XFIRE: return $this->xfireAvatar;
+			case User::IMG_LIVE:
 			default: return $this->unknown;
 		}
+	}
+	
+	public function mailRegistration()
+	{
+		mail(
+			$this->email,
+			'Registration details to '.Yii::app()->name,
+'Dear '.$this->username.',
+
+Thank you for your interest in '.Yii::app()->name.'! Your credentials are as follows:
+Username: '.$this->username.'
+E-mail: '.$this->email.'
+Password: <not disclosed>
+
+You may click on the following link (http://'.$_SERVER['SERVER_NAME'].Yii::app()->request->getBaseUrl().'/account/confirm/'.$this->hash.') to activate your account, or enter the code ('.$this->hash.') at http://'.$_SERVER['SERVER_NAME'].Yii::app()->request->getBaseUrl().'/account/confirm . From there, you can then register for events and tournaments.
+
+If this is not you, feel free to disregard this e-mail.
+
+Sincerely,
+SalukiLAN Team
+',
+			'From: '.Yii::app()->params['adminEmail']
+		);
+	}
+	
+	public function mailReset()
+	{
+		mail(
+			$this->email,
+			'Password Reset details to '.Yii::app()->name,
+'Dear '.$this->username.',
+
+Someone has request a password reset for your account:
+Username: '.$this->username.'
+E-mail: '.$this->email.'
+
+You may click on the following link (http://'.$_SERVER['SERVER_NAME'].Yii::app()->request->getBaseUrl().'/account/reset/'.$this->hash.') to reset your password, or enter the code ('.$this->hash.') at http://'.$_SERVER['SERVER_NAME'].Yii::app()->request->getBaseUrl().'/account/reset . From there, you can then log back into your account.
+
+If this is not you, feel free to disregard this e-mail.
+
+Sincerely,
+SalukiLAN Team
+',
+			'From: '.Yii::app()->params['adminEmail']
+		);
+	}
+	
+	public static function getCurrentUser()
+	{
+		if (Yii::app()->user->isGuest) return NULL;
+		return User::model()->find('id=:id', array(':id'=>Yii::app()->user->id));
+	}
+	
+	public function joinEvent($eid)
+	{
+		if (Yii::app()->user->isGuest) return false;
+		$user = User::getCurrentUser();
+		$eventArray = array($eid);
+		foreach ($user->events as $event) {
+			if ($event->id != $eid)
+				array_push($eventArray, $event->id);
+		}
+		$user->events = array();
+		$user->save();
+		$user->events = $eventArray;
+		$user->save();
+		return true;
+	}
+	
+	public function leaveEvent($eid)
+	{
+		if (Yii::app()->user->isGuest) return false;
+		$user = User::getCurrentUser();
+		$eventArray = array();
+		foreach ($user->events as $event) {
+			if ($event->id != $eid)
+				array_push($eventArray, $event->id);
+		}
+		$user->events = array();
+		$user->save();
+		$user->events = $eventArray;
+		$user->save();
+		return true;
 	}
 }

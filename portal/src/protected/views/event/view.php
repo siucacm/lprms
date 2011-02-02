@@ -29,9 +29,12 @@ $this->menu=array(
 				<br />
 					<?php if ($model->location != null) echo $model->location->address; ?>
                 <span class="textheader">When</span>
-                <b>Start:</b> <?php echo date('M j, Y @ g:iA', strtotime($model->datetime_start)); ?><br />
-                <b>End:</b> <?php echo date('M j, Y @ g:iA', strtotime($model->datetime_end)); ?><br />
+                <b>Start:</b> <?php echo Event::getDateTime($model->datetime_start); ?><br />
+                <b>End:</b> <?php echo Event::getDateTime($model->datetime_end); ?><br />
                 <b>Duration:</b> <?php echo $model->duration; ?>
+				<br /><br /><br /><br />
+                <span class="textheader">Status</span>
+                <?php echo $model->detailedStatus; ?>
             </div>
         </div>
         <div class="tabbertab" title="Information">
@@ -60,8 +63,6 @@ $this->menu=array(
 				'itemView'=>'_view_user',
 			));
 		?>
-        </div>
-        <div class="tabbertab" title="Register">
         </div>
     </div>
 </div>

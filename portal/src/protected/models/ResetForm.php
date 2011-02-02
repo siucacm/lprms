@@ -1,13 +1,10 @@
 <?php
 
-/**
- * ConfirmForm class.
- * ConfirmForm is the data structure for keeping
- * user confirm form data. It is used by the 'confirm' action of 'SiteController'.
- */
-class ConfirmForm extends CFormModel
+class ResetForm extends CFormModel
 {
-	public $confirm;
+	public $reset;
+	public $password1;
+	public $password2;
 
 	private $_identity;
 
@@ -20,7 +17,8 @@ class ConfirmForm extends CFormModel
 	{
 		return array(
 			// confirmation code is required
-			array('confirm', 'required'),
+			array('reset, password1, password2', 'required'),
+			array('password2', 'compare', 'compareAttribute'=>'password1'),
 		);
 	}
 
@@ -29,7 +27,11 @@ class ConfirmForm extends CFormModel
 	 */
 	public function attributeLabels()
 	{
-		return array();
+		return array(
+			'reset' => 'Reset Code',
+			'password1' => 'Password',
+			'password2' => 'Confirm Password',
+		);
 	}
 
 	/**
@@ -41,7 +43,7 @@ class ConfirmForm extends CFormModel
 		if($this->_identity===null)
 		{
 			$this->_identity=new HashIdentity(NULL, NULL);
-			$this->_identity->hash = $this->confirm;
+			$this->_identity->hash = $this->reset;
 			$this->_identity->authenticate();
 		}
 		if($this->_identity->errorCode===HashIdentity::ERROR_NONE)

@@ -6,15 +6,14 @@ $this->breadcrumbs=array(
 ?>
 
 <h1>Login</h1>
-
-<p>Please fill out the following form with your login credentials:</p>
+<p><?php if (isset($_GET['extra']) && $_GET['extra'] == 'confirmed') echo 'Account already confirmed'; ?></p>
 
 <div class="form">
 <?php $form=$this->beginWidget('CActiveForm', array(
 	'id'=>'login-form',
 	'enableAjaxValidation'=>false,
 )); ?>
-	<p class="note">Fields with <span class="required">*</span> are required.</p>
+	<p class="note">Forgot your password? <?php echo CHtml::link('Click here to reset your password.', '/account/forget'); ?></p>
 
 	<div class="row">
 		<?php echo $form->labelEx($model,'username'); ?>
@@ -40,3 +39,4 @@ $this->breadcrumbs=array(
 
 <?php $this->endWidget(); ?>
 </div><!-- form -->
+
